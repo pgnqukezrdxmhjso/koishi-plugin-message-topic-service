@@ -1,22 +1,42 @@
 {
   "name": "koishi-plugin-message-topic-service",
   "description": "",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "scripts": {
+    "build": "cd ../../ && yarn build message-topic-service",
+    "pub": "cd ../../ && yarn pub message-topic-service",
+    "fastPub": "cd ../../ && yarn bump -3 message-topic-service && yarn build message-topic-service && yarn pub message-topic-service",
+    "test": "node ./test/test.js"
+  },
   "files": [
     "lib",
     "dist"
   ],
+  "contributors": [
+    "pgnqukezrdxmhjso"
+  ],
+  "homepage": "https://github.com/pgnqukezrdxmhjso/koishi-plugin-message-topic-service",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pgnqukezrdxmhjso/koishi-plugin-message-topic-service.git"
+  },
   "license": "MIT",
-  "scripts": {},
   "keywords": [
     "chatbot",
     "koishi",
-    "plugin"
+    "plugin",
+    "message topic"
   ],
-  "devDependencies": {},
   "peerDependencies": {
     "koishi": "^4.18.0"
+  },
+  "koishi": {
+    "service": {
+      "implements": [
+        "messageTopicService"
+      ]
+    }
   }
 }
