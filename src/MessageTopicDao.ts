@@ -136,7 +136,11 @@ const MessageTopicDao = {
         const date = new Date();
         if (rows.length < 1) {
           await ctx.database.create(MessageTopicSubscribeTable, {
-            ...form,
+            platform: form.platform,
+            self_id: form.selfId,
+            channel_id: form.channelId,
+            binding_key: form.bindingKey,
+            enable: form.enable,
             create_at: date,
             update_at: date,
           });
