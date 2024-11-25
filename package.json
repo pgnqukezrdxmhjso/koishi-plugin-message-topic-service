@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-message-topic-service",
   "description": "",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
@@ -27,13 +27,16 @@
     "chatbot",
     "koishi",
     "plugin",
-    "message topic"
+    "message topic service"
   ],
   "peerDependencies": {
     "koishi": "^4.18.0"
   },
   "koishi": {
     "service": {
+      "required": [
+        "database"
+      ],
       "implements": [
         "messageTopicService"
       ]
