@@ -5,6 +5,15 @@ import MessageTopicDao, { TopicSubscribeForm } from "./MessageTopicDao";
 const sleep = async (time: number) =>
   new Promise((resolve) => setTimeout(resolve, time));
 
+export interface RegisteredTopic {
+  name: string;
+  topics: string[];
+}
+
+export interface RegisteredTopicMap {
+  [key: string]: RegisteredTopic;
+}
+
 const MessageTopicServiceImpl = {
   async init(ctx: Context): Promise<void> {
     MessageTopicDao.initDB(ctx);
@@ -13,21 +22,21 @@ const MessageTopicServiceImpl = {
   async registerTopic(
     ctx: Context,
     sourceCtx: Context,
-    registeredTopic: {},
+    registeredTopicMap: RegisteredTopicMap,
     topic: string,
   ) {
     const sourceKey = sourceCtx.scope.uid || sourceCtx.name;
     sourceCtx.on("dispose", () => {
-      delete registeredTopic[sourceKey];
+      delete registeredTopicMap[sourceKey];
       return MessageTopicDao.topicAbandon(ctx, topic);
     });
-    if (!registeredTopic[sourceKey]) {
-      registeredTopic[sourceKey] = {
+    if (!registeredTopicMap[sourceKey]) {
+      registeredTopicMap[sourceKey] = {
         name: sourceCtx.name,
         topics: [],
       };
     }
-    registeredTopic[sourceKey].topics.push(topic);
+    registeredTopicMap[sourceKey].topics.push(topic);
     return MessageTopicDao.topicClaim(ctx, topic);
   },
   async topicSubscribe(ctx: Context, form: TopicSubscribeForm) {
@@ -68,6 +77,7 @@ const MessageTopicServiceImpl = {
       throw new Error("no subscribers");
     }
     let sent = false;
+    let sentChannel = [];
     for (const item of targetList) {
       for (let bot of ctx.bots) {
         if (bot.platform !== item.platform) {
@@ -76,7 +86,16 @@ const MessageTopicServiceImpl = {
         if (!config.ignoreSelfIdWhenSending && bot.selfId !== item.self_id) {
           continue;
         }
+        if (
+          config.ignoreTopicMultipleMatches &&
+          sentChannel.includes(item.platform + "-" + item.channel_id)
+        ) {
+          continue;
+        }
         sent = true;
+        if (config.ignoreTopicMultipleMatches) {
+          sentChannel.push(item.platform + "-" + item.channel_id);
+        }
         const _s = async (numberOfRetries: number = 0) => {
           try {
             await bot.sendMessage(item.channel_id, msg);

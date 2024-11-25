@@ -19,9 +19,9 @@ export interface MessageTopic {
 
 export interface TopicSubscribeForm {
   platform: string;
-  self_id?: string;
-  channel_id: string;
-  binding_key: string;
+  selfId?: string;
+  channelId: string;
+  bindingKey: string;
   enable: boolean;
 }
 
@@ -126,12 +126,12 @@ const MessageTopicDao = {
   },
   async topicSubscribe(ctx: Context, form: TopicSubscribeForm) {
     await LockUtil.synchronized({
-      key: `MessageTopicService.topicSubscribe.${form.platform}-${form.channel_id}-${form.binding_key}`,
+      key: `MessageTopicService.topicSubscribe.${form.platform}-${form.channelId}-${form.bindingKey}`,
       fn: async () => {
         const rows = await ctx.database.get(MessageTopicSubscribeTable, {
           platform: form.platform,
-          channel_id: form.channel_id,
-          binding_key: form.binding_key,
+          channel_id: form.channelId,
+          binding_key: form.bindingKey,
         });
         const date = new Date();
         if (rows.length < 1) {
@@ -143,7 +143,7 @@ const MessageTopicDao = {
           return;
         }
         await ctx.database.set(MessageTopicSubscribeTable, rows[0].id, () => ({
-          self_id: form.self_id,
+          self_id: form.selfId,
           enable: form.enable,
           update_at: date,
         }));

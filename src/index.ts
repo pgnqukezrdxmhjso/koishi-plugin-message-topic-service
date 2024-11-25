@@ -1,5 +1,7 @@
 import { Context, Schema, Service } from "koishi";
-import MessageTopicServiceImpl from "./MessageTopicServiceImpl";
+import MessageTopicServiceImpl, {
+  RegisteredTopicMap,
+} from "./MessageTopicServiceImpl";
 import { TopicSubscribeForm } from "./MessageTopicDao";
 
 declare module "koishi" {
@@ -7,13 +9,21 @@ declare module "koishi" {
     messageTopicService: MessageTopicService;
   }
 }
+
+export { RegisteredTopic, RegisteredTopicMap } from "./MessageTopicServiceImpl";
+export {
+  MessageTopic,
+  MessageTopicSubscribe,
+  TopicSubscribeForm,
+} from "./MessageTopicDao";
+
 const MessageTopicServiceName = "messageTopicService";
 
 class MessageTopicService extends Service {
   _ctx: Context;
   _config: MessageTopicService.Config;
 
-  registeredTopic = {};
+  registeredTopicMap: RegisteredTopicMap = {};
 
   constructor(ctx: Context, config: MessageTopicService.Config) {
     super(ctx, MessageTopicServiceName);
@@ -25,23 +35,53 @@ class MessageTopicService extends Service {
     await MessageTopicServiceImpl.init(this.ctx);
   }
 
+  /**
+   * register topic publisher, automatically unregister when the caller disposes
+   * <br/>
+   * registration is not mandatory, but only statistical
+   * @param {string} topic
+   */
   async registerTopic(topic: string) {
     return MessageTopicServiceImpl.registerTopic(
       this._ctx,
       this.ctx,
-      this.registeredTopic,
+      this.registeredTopicMap,
       topic,
     );
   }
 
-  registerTopicInfo() {
-    return JSON.parse(JSON.stringify(this.registeredTopic));
+  /**
+   * get currently registered topic pusher information
+   */
+  registerTopicInfo(): RegisteredTopicMap {
+    return JSON.parse(JSON.stringify(this.registeredTopicMap));
   }
 
+  /**
+   * subscribe to topic messages
+   * <br/>
+   * matching rules:
+   * <br/>
+   * topic: msg.a.b.c
+   * <br/>
+   * bindingKey: msg.*.#
+   * <br/>
+   * Matches the same string
+   * <br/>
+   * "*" Can match any string once
+   * <br/>
+   * "#" Can match zero to unlimited times any string
+   * @param {TopicSubscribeForm} form
+   */
   async topicSubscribe(form: TopicSubscribeForm) {
     return MessageTopicServiceImpl.topicSubscribe(this._ctx, form);
   }
 
+  /**
+   * get the topic subscribed by the channel
+   * @param {string} platform
+   * @param {string} channelId
+   */
   async getTopicSubscribeByChannel(platform: string, channelId: string) {
     return MessageTopicServiceImpl.getTopicSubscribeByChannel(
       this._ctx,
@@ -50,6 +90,12 @@ class MessageTopicService extends Service {
     );
   }
 
+  /**
+   * send a topic message
+   * @param {string} topic
+   * @param {string} msg
+   * @param {MessageTopicService.Config} config configuration of overridable service
+   */
   async sendMessageToTopic(
     topic: string,
     msg: string,
@@ -72,6 +118,7 @@ namespace MessageTopicService {
     ignoreSelfIdWhenSending?: boolean;
     ignoreNoBotMatched?: boolean;
     ignoreNoSubscribers?: boolean;
+    ignoreTopicMultipleMatches?: boolean;
     maxNumberOfResends?: number;
     resendInterval?: number;
   }
@@ -91,6 +138,11 @@ namespace MessageTopicService {
       .default(true)
       .description(
         "Sending a message without no subscribers does not throw an exception",
+      ),
+    ignoreTopicMultipleMatches: Schema.boolean()
+      .default(true)
+      .description(
+        "Do not send repeatedly when different subscriptions of the same channel are matched at the same time",
       ),
     maxNumberOfResends: Schema.number()
       .default(2)
