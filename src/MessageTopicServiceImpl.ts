@@ -49,6 +49,9 @@ const MessageTopicServiceImpl = {
   ) {
     return MessageTopicDao.getTopicSubscribeByChannel(ctx, platform, channelId);
   },
+  async getTopicSubscribeByTopic(ctx: Context, topic: string) {
+    return await MessageTopicDao.getTopicSubscribeByTopic(ctx, topic);
+  },
   async sendMessageToTopic(
     ctx: Context,
     topic: string,

@@ -91,6 +91,14 @@ class MessageTopicService extends Service {
   }
 
   /**
+   * get subscribers of a topic
+   * @param topic
+   */
+  async getTopicSubscribeByTopic(topic: string) {
+    return MessageTopicServiceImpl.getTopicSubscribeByTopic(this._ctx, topic);
+  }
+
+  /**
    * send a topic message
    * @param {string} topic
    * @param {string} msg

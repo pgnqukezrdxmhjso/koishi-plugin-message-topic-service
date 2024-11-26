@@ -84,6 +84,13 @@ const rows = await ctx.messageTopicService.getTopicSubscribeByChannel(
 
 ```
 /**
+ * get subscribers of a topic
+ */
+const rows = await ctx.messageTopicService.getTopicSubscribeByTopic(topic);
+```
+
+```
+/**
  * send a topic message
  * @param {string} topic
  * @param {string} msg
