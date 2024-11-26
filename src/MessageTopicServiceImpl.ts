@@ -79,7 +79,7 @@ const MessageTopicServiceImpl = {
       }
       throw new Error("no subscribers");
     }
-    let sent = false;
+    const toBeSent = {};
     let sentChannel = [];
     for (const item of targetList) {
       for (let bot of ctx.bots) {
@@ -95,26 +95,42 @@ const MessageTopicServiceImpl = {
         ) {
           continue;
         }
-        sent = true;
         if (config.ignoreTopicMultipleMatches) {
           sentChannel.push(item.platform + "-" + item.channel_id);
         }
-        const _s = async (numberOfRetries: number = 0) => {
-          try {
-            await bot.sendMessage(item.channel_id, msg);
-          } catch (err) {
-            ctx.logger.error(err);
-            if (numberOfRetries < config.maxNumberOfResends) {
-              await sleep(config.resendInterval);
-              _s(numberOfRetries + 1).then();
-            }
-          }
-        };
-        _s().then();
+
+        if (!toBeSent[item.platform]) {
+          toBeSent[item.platform] = [];
+        }
+        toBeSent[item.platform].push({
+          channel_id: item.channel_id,
+          bot,
+        });
       }
     }
-    if (!sent && !config.ignoreNoBotMatched) {
+    if (Object.keys(toBeSent).length < 1 && !config.ignoreNoBotMatched) {
       throw new Error("no bot matched");
+    }
+
+    for (let platform in toBeSent) {
+      const itemList = toBeSent[platform];
+      (async () => {
+        for (let item of itemList) {
+          const _s = async (numberOfRetries: number = 0) => {
+            try {
+              await item.bot.sendMessage(item.channel_id, msg);
+            } catch (err) {
+              ctx.logger.error(err);
+              if (numberOfRetries < config.maxNumberOfResends) {
+                await sleep(config.resendInterval);
+                await _s(numberOfRetries + 1);
+              }
+            }
+          };
+          await _s();
+          await sleep(config.sendInterval);
+        }
+      })().then();
     }
   },
 };

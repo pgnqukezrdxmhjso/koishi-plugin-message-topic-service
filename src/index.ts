@@ -127,6 +127,7 @@ namespace MessageTopicService {
     ignoreNoBotMatched?: boolean;
     ignoreNoSubscribers?: boolean;
     ignoreTopicMultipleMatches?: boolean;
+    sendInterval?: number;
     maxNumberOfResends?: number;
     resendInterval?: number;
   }
@@ -152,6 +153,9 @@ namespace MessageTopicService {
       .description(
         "Do not send repeatedly when different subscriptions of the same channel are matched at the same time",
       ),
+    sendInterval: Schema.number()
+      .default(1000)
+      .description("same platform message sending interval"),
     maxNumberOfResends: Schema.number()
       .default(2)
       .description(
