@@ -1,9 +1,6 @@
-import { Context, Fragment } from "koishi";
+import {Context, Fragment} from "koishi";
 import MessageTopicService from "./index";
-import MessageTopicDao, { TopicSubscribeForm } from "./MessageTopicDao";
-
-const sleep = async (time: number) =>
-  new Promise((resolve) => setTimeout(resolve, time));
+import MessageTopicDao, {TopicSubscribeForm} from "./MessageTopicDao";
 
 export interface RegisteredTopic {
   name: string;
@@ -59,7 +56,7 @@ const MessageTopicServiceImpl = {
     ctxConfig: MessageTopicService.Config,
     config: MessageTopicService.Config = {},
   ) {
-    config = { ...ctxConfig, ...config };
+    config = {...ctxConfig, ...config};
     if (!topic || topic.length < 1) {
       return;
     }
@@ -126,20 +123,20 @@ const MessageTopicServiceImpl = {
                 msgIds.forEach((id) =>
                   ctx.setTimeout(
                     () => item.bot.deleteMessage(item.channel_id, id),
-                    config.retractTime * 1000,
+                    config.retractTime,
                   ),
                 );
               }
             } catch (err) {
               ctx.logger.error(err);
               if (numberOfRetries < config.maxNumberOfResends) {
-                await sleep(config.resendInterval);
+                await ctx.sleep(config.resendInterval);
                 await _s(numberOfRetries + 1);
               }
             }
           };
           await _s();
-          await sleep(config.sendInterval);
+          await ctx.sleep(config.sendInterval);
         }
       })().then();
     }

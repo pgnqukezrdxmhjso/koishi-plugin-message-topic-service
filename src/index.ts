@@ -1,8 +1,8 @@
-import { Context, Fragment, Schema, Service } from "koishi";
+import {Context, Fragment, Schema, Service} from "koishi";
 import MessageTopicServiceImpl, {
   RegisteredTopicMap,
 } from "./MessageTopicServiceImpl";
-import { TopicSubscribeForm } from "./MessageTopicDao";
+import {TopicSubscribeForm} from "./MessageTopicDao";
 
 declare module "koishi" {
   interface Context {
@@ -10,7 +10,7 @@ declare module "koishi" {
   }
 }
 
-export { RegisteredTopic, RegisteredTopicMap } from "./MessageTopicServiceImpl";
+export {RegisteredTopic, RegisteredTopicMap} from "./MessageTopicServiceImpl";
 export {
   MessageTopic,
   MessageTopicSubscribe,
@@ -169,7 +169,7 @@ namespace MessageTopicService {
       ),
     retractTime: Schema.number()
       .default(0)
-      .description("Message retract time(Second,0 is no retract)"),
+      .description("Message retract time(millisecond, 0 is no retract)"),
   });
 }
 
