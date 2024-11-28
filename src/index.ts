@@ -1,4 +1,4 @@
-import { Context, Schema, Service } from "koishi";
+import { Context, Fragment, Schema, Service } from "koishi";
 import MessageTopicServiceImpl, {
   RegisteredTopicMap,
 } from "./MessageTopicServiceImpl";
@@ -101,12 +101,12 @@ class MessageTopicService extends Service {
   /**
    * send a topic message
    * @param {string} topic
-   * @param {string} msg
+   * @param {Fragment} msg
    * @param {MessageTopicService.Config} config configuration of overridable service
    */
   async sendMessageToTopic(
     topic: string,
-    msg: string,
+    msg: Fragment,
     config?: MessageTopicService.Config,
   ) {
     return MessageTopicServiceImpl.sendMessageToTopic(
