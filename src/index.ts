@@ -130,6 +130,7 @@ namespace MessageTopicService {
     sendInterval?: number;
     maxNumberOfResends?: number;
     resendInterval?: number;
+    retractTime?: number;
   }
 
   export const Config: Schema<Config> = Schema.object({
@@ -166,6 +167,9 @@ namespace MessageTopicService {
       .description(
         "The interval between retries when a message fails to be sent",
       ),
+    retractTime: Schema.number()
+      .default(0)
+      .description("Message retract time(Second,0 is no retract)"),
   });
 }
 

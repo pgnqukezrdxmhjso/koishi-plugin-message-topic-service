@@ -118,7 +118,18 @@ const MessageTopicServiceImpl = {
         for (let item of itemList) {
           const _s = async (numberOfRetries: number = 0) => {
             try {
-              await item.bot.sendMessage(item.channel_id, msg);
+              const msgIds: string[] = await item.bot.sendMessage(
+                item.channel_id,
+                msg,
+              );
+              if (config.retractTime) {
+                msgIds.forEach((id) =>
+                  ctx.setTimeout(
+                    () => item.bot.deleteMessage(item.channel_id, id),
+                    config.retractTime * 1000,
+                  ),
+                );
+              }
             } catch (err) {
               ctx.logger.error(err);
               if (numberOfRetries < config.maxNumberOfResends) {
