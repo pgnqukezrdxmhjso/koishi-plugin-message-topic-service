@@ -135,7 +135,7 @@ namespace MessageTopicService {
 
   export const Config: Schema<Config> = Schema.object({
     ignoreSelfIdWhenSending: Schema.boolean()
-      .default(true)
+      .default(false)
       .description(
         "Ignore bot id when sending messages. Other bots in the same channel can also send messages to which other bots subscribe",
       ),
